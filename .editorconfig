@@ -1,0 +1,48 @@
+# EditorConfig のルート設定。これにより、このプロジェクト内で設定を統一します。
+root = true
+
+# Java、Kotlin、XML ファイルに対する共通設定
+[*.{java,kt}]
+# インデントスタイルはスペース
+indent_style = space
+# インデントのサイズは 4 スペース
+indent_size = 4
+# 改行コードは LF (Unix/Linux) に統一
+end_of_line = lf
+# ファイルの最後には必ず改行を追加
+insert_final_newline = true
+# タブ文字を禁止（スペースのみ使用）
+tab_width = 4
+
+# Java と Kotlin のファイルで必要な設定
+# Kt ファイルや Java ファイルでの改行などの設定が一致するように
+# コードが一貫して整形されるように
+trim_trailing_whitespace = true
+
+# XML ファイルの設定
+[*.xml]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+insert_final_newline = true
+
+# Markdown ファイルの設定
+[*.md]
+# Markdownファイルの改行コード設定
+end_of_line = lf
+insert_final_newline = true
+
+# JSON ファイル
+[*.json]
+# JSONファイルはインデントを2スペースにする
+indent_style = space
+indent_size = 2
+end_of_line = lf
+insert_final_newline = true
+
+# プロジェクトの設定や設定ファイル (Gradle, IDE 設定ファイル) にはインデントを 2 スペースに
+[*.{gradle,properties}]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+insert_final_newline = true
