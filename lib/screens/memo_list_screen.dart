@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'dart:convert';
+
 import '../models/memo.dart';
 import '../providers/memo_provider.dart';
 import 'memo_edit_screen.dart';
@@ -9,14 +12,25 @@ import 'settings_screen.dart';
 class MemoListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<MemoProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('メモ一覧'),
+        title: TextField(
+          decoration: const InputDecoration(
+            hintText: 'メモを検索...',
+            border: InputBorder.none,
+            hintStyle: TextStyle(color: Colors.white70),
+          ),
+          style: const TextStyle(color: Colors.white),
+          onChanged: (query) {
+            provider.updateSearchQuery(query);
+          },
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              // 設定画面へ遷移
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => SettingsScreen()),
@@ -39,21 +53,33 @@ class MemoListScreen extends StatelessWidget {
               final memo = memos[index];
 
               return ListTile(
-                title: Text(memo.content, maxLines: 1, overflow: TextOverflow.ellipsis),
-                onTap: () {
-                  // メモ編集画面へ遷移
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => MemoEditScreen(memo: memo),
+                tileColor: Color(memo.color),
+                title: Text(
+                  getPreviewText(memo.content),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                leading: IconButton(
+                  icon: Icon(memo.isPinned ? Icons.push_pin : Icons.push_pin_outlined),
+                  onPressed: () => provider.togglePin(memo),
+                ),
+                subtitle: Text(memo.category),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => MemoEditScreen(memo: memo)),
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.download),
+                      onPressed: () => provider.exportMemo(memo),
                     ),
-                  );
-                },
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () {
-                    _confirmDelete(context, provider, memo);
-                  },
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => _confirmDelete(context, provider, memo),
+                    ),
+                  ],
                 ),
               );
             },
@@ -63,7 +89,6 @@ class MemoListScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
-          // 新規メモ作成画面へ遷移
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -86,9 +111,7 @@ class MemoListScreen extends StatelessWidget {
           actions: [
             TextButton(
               child: const Text("キャンセル"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
               child: const Text("削除"),
@@ -101,5 +124,15 @@ class MemoListScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  /// Delta形式のJSON文字列を普通のテキストに変換
+  String getPreviewText(String contentJson) {
+    try {
+      final doc = quill.Document.fromJson(jsonDecode(contentJson));
+      return doc.toPlainText().trim();
+    } catch (_) {
+      return '';
+    }
   }
 }

@@ -6,6 +6,15 @@
 - `screens/memo_list_screen.dart`: メモ一覧を表示する画面
 - `screens/memo_edit_screen.dart`: メモの編集画面です。メモを新規作成または編集する
 - `database/db_helper.dart`: SQLiteデータベースのヘルパークラスで、データの挿入、取得、更新、削除を行う
+- `utils/export_helper.dart`: メモをテキストファイルに出力する処理
+- `screens/settings_screen.dart`: 設定画面
+
+### データベース構造
+- `memos テーブル`: カラム一覧（id, content, color, isPinned, category）
+
+### 使い方
+- `作成`: メモ作成 → 保存 → 一覧 → 編集 → 削除 の流れ
+- `機能`: ピン留め、色変更、カテゴリ管理など
 
 ### おすすめ設定
 - `空白、行番号表示`

@@ -20,15 +20,32 @@ class MemoDatabase {
       return _database!;
     }
 
+    final path = join(await getDatabasesPath(), 'memo_database.db');
+
     _database = await openDatabase(
-      join(await getDatabasesPath(), 'memo_database.db'),
-      version: 1,
+      path,
+      version: 2, // バージョンを明示的に上げる
       onCreate: (db, version) {
-        return db.execute(
-          "CREATE TABLE memos(id INTEGER PRIMARY KEY AUTOINCREMENT, content TEXT)",
-        );
+        return db.execute('''
+        CREATE TABLE memos(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        content TEXT,
+        color INTEGER,
+        isPinned INTEGER,
+        category TEXT
+        )
+        ''');
+        },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          // version1→2 にアップグレードする際に color カラムを追加
+          await db.execute("ALTER TABLE memos ADD COLUMN color INTEGER DEFAULT 4294967295");
+          await db.execute("ALTER TABLE memos ADD COLUMN isPinned INTEGER DEFAULT 0");
+          await db.execute("ALTER TABLE memos ADD COLUMN category TEXT DEFAULT ''");
+        }
       },
     );
+
     return _database!;
   }
 
@@ -40,9 +57,9 @@ class MemoDatabase {
   }
 
   /// メモを追加
-  Future<void> insertMemo(Memo memo) async {
+  Future<int> insertMemo(Memo memo) async {
     final db = await getDatabase();
-    await db.insert('memos', memo.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    return await db.insert('memos', memo.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   /// メモを更新
